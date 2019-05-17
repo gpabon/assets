@@ -36,7 +36,7 @@ def sharpe_ratio(ERp, rf, sigmap):
 def clean_wi(wi, decimals):
     return(np.round(wi, decimals))
 
-def min_size(wi, prices):
+def min_size(wi, prices, decimals=2):
     last_date = max(prices.index)
     last_prices = prices.loc[last_date,:]
     possible_vols = last_prices / wi
@@ -45,7 +45,8 @@ def min_size(wi, prices):
     vols = wi * min_vol
     num_shares = np.round(vols / last_prices,0)
     vols_adjusted = last_prices*num_shares
-    return(num_shares, np.round(vols_adjusted.sum(),0))
+    weights_adjusted = clean_wi(vols_adjusted/vols_adjusted.sum(),decimals)
+    return(num_shares, np.round(vols_adjusted.sum(),0), weights_adjusted)
 
 def tangency_portfolio(prices):
     mu = expected_returns.mean_historical_return(prices)
@@ -129,6 +130,6 @@ if __name__ == '__main__':
     weights_ser = pd.Series(weights_arr, index=prices.columns)
     non_zero_weights = weights_ser[weights_ser>0]
     print(non_zero_weights)
-    num_shares, total_price = min_size(weights_arr, prices)
+    num_shares, total_price, vols_adjusted = min_size(weights_arr, prices)
     print(num_shares[num_shares>0])
     print(total_price)
