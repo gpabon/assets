@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from pypfopt.efficient_frontier import EfficientFrontier
 from pypfopt import risk_models, expected_returns
+import time
 
 def daily_pct_returns(prices):
     return(prices.pct_change().dropna(how='all'))
@@ -59,45 +60,49 @@ def tangency_portfolio(prices):
 
 def train_history(prices, market_days, risk_free_rate, 
         num_samples_train_lst = [20, 40, 60, 90, 120],
-        num_samples_predict = 5):
+        num_samples_predict_lst = [1, 5, 10, 20]):
     sharpe_ratios_lst = []
+    num_samples_lst = []
+    print('Execution date/time:',time.asctime(time.localtime(time.time())))
     for num_samples_train in num_samples_train_lst:
-        left_limit = len(prices) - num_samples_predict - num_samples_train + 1
-        daily_returns_lst = []
-        for i in range(0, left_limit):
-            print('.', end=' ', flush=True)
-            prices_train_idxs = prices.index[i:i + num_samples_train]
-            prices_train = prices.loc[prices_train_idxs,:].copy()
-            weights_train = tangency_portfolio(prices_train)
-            prices_predict_idxs = prices.index[i + num_samples_train - 1:\
-                    i + num_samples_train + num_samples_predict]
-            if i >= left_limit - 1:
-                print()
-                print(prices_train_idxs)
-                print(prices_predict_idxs)
-            prices_predict = prices.loc[prices_predict_idxs,:].copy()
-            ERp = portfolio_expected_return_from_prices(weights_train, 
-                    prices_predict)
-            daily_returns_lst.append(ERp)
-        print()
-        yearly_returns = np.array(daily_returns_lst) * market_days
-        mean_yearly_returns = yearly_returns.mean()
-        std_yearly_returns = yearly_returns.std()
-        sharpe_ratio = (mean_yearly_returns - risk_free_rate) /\
-                std_yearly_returns
-        print('Numer of days back:', num_samples_train)
-        print('Expected return:', mean_yearly_returns)
-        print('Expected risk:', std_yearly_returns)
-        print('Sharpe ratio:', sharpe_ratio)
-        sharpe_ratios_lst.append(sharpe_ratio)
+        for num_samples_predict in num_samples_predict_lst:
+            left_limit = len(prices) - num_samples_predict - \
+                    num_samples_train + 1
+            daily_returns_lst = []
+            for i in range(0, left_limit):
+                print('.', end=' ', flush=True)
+                prices_train_idxs = prices.index[i:i + num_samples_train]
+                prices_train = prices.loc[prices_train_idxs,:].copy()
+                weights_train = tangency_portfolio(prices_train)
+                prices_predict_idxs = prices.index[i + num_samples_train - 1:\
+                        i + num_samples_train + num_samples_predict]
+                prices_predict = prices.loc[prices_predict_idxs,:].copy()
+                ERp = portfolio_expected_return_from_prices(weights_train, 
+                        prices_predict)
+                daily_returns_lst.append(ERp)
+            print()
+            yearly_returns = np.array(daily_returns_lst) * market_days
+            mean_yearly_returns = yearly_returns.mean()
+            std_yearly_returns = yearly_returns.std()
+            sharpe_ratio = (mean_yearly_returns - risk_free_rate) /\
+                    std_yearly_returns
+            print('Numer of days back:', num_samples_train)
+            print('Numer of days forward:', num_samples_predict)
+            print('Expected return:', mean_yearly_returns)
+            print('Expected risk:', std_yearly_returns)
+            print('Sharpe ratio:', sharpe_ratio)
+            sharpe_ratios_lst.append(sharpe_ratio)
+            num_samples_lst.append((num_samples_train, num_samples_predict))
     sharpe_ratios = np.array(sharpe_ratios_lst)
     max_sharpe_ratio = sharpe_ratios.max()
     max_sharpe_ratio_idx = sharpe_ratios.argmax()
-    opt_num_samples = num_samples_train_lst[max_sharpe_ratio_idx]
+    opt_num_samples_train, opt_num_samples_predict = \
+            num_samples_lst[max_sharpe_ratio_idx]
     print()
-    print('Optimal number of days back:', opt_num_samples)
+    print('Optimal number of days back:', opt_num_samples_train)
+    print('Optimal number of days forward:', opt_num_samples_predict)
     print('Sharpe ratio:', max_sharpe_ratio)
-    return(opt_num_samples)
+    return((opt_num_samples_train, opt_num_samples_predict))
 
 def suggested_portfolio(history_sample_size, prices, decimals=2):
     left_limit = len(prices) - history_sample_size
