@@ -59,7 +59,7 @@ def tangency_portfolio(prices):
 
 def train_history(prices, market_days, risk_free_rate, 
         num_samples_train_lst = [20, 40, 60, 90, 120],
-        num_samples_predict = 20):
+        num_samples_predict = 5):
     sharpe_ratios_lst = []
     for num_samples_train in num_samples_train_lst:
         left_limit = len(prices) - num_samples_predict - num_samples_train + 1
@@ -69,8 +69,12 @@ def train_history(prices, market_days, risk_free_rate,
             prices_train_idxs = prices.index[i:i + num_samples_train]
             prices_train = prices.loc[prices_train_idxs,:].copy()
             weights_train = tangency_portfolio(prices_train)
-            prices_predict_idxs = prices.index[i + num_samples_train:\
+            prices_predict_idxs = prices.index[i + num_samples_train - 1:\
                     i + num_samples_train + num_samples_predict]
+            if i >= left_limit - 1:
+                print()
+                print(prices_train_idxs)
+                print(prices_predict_idxs)
             prices_predict = prices.loc[prices_predict_idxs,:].copy()
             ERp = portfolio_expected_return_from_prices(weights_train, 
                     prices_predict)
@@ -115,7 +119,7 @@ if __name__ == '__main__':
     #wic = clean_wi(wi,2)
     #print(wic)
     #print(min_size(wic, prices))
-    #num_samples = train_history(prices, 241, .02)
+    num_samples = train_history(prices, 241, .02)
     weights_arr = suggested_portfolio(40, prices)
     weights_ser = pd.Series(weights_arr, index=prices.columns)
     non_zero_weights = weights_ser[weights_ser>0]
