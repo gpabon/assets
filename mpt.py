@@ -70,7 +70,7 @@ def train_history(prices, market_days, risk_free_rate,
             left_limit = len(prices) - num_samples_predict - \
                     num_samples_train + 1
             daily_returns_lst = []
-            for i in range(0, left_limit):
+            for i in range(0, left_limit, num_samples_predict):
                 print('.', end=' ', flush=True)
                 prices_train_idxs = prices.index[i:i + num_samples_train]
                 prices_train = prices.loc[prices_train_idxs,:].copy()

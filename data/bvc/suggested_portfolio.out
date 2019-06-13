@@ -1,0 +1,34 @@
+Portfolio weights:
+BBVACOL       0.17
+BMC           0.04
+EXITO         0.05
+GASNATURAL    0.19
+MINEROS       0.25
+POPULAR       0.10
+PROMIGAS      0.15
+TERPEL        0.05
+dtype: float64
+
+Portfolio minimal number of shares per asset:
+BBVACOL       225.0
+BMC            12.0
+EXITO           1.0
+GASNATURAL      1.0
+MINEROS        44.0
+POPULAR       130.0
+PROMIGAS       10.0
+TERPEL          2.0
+Name: 2019-05-16, dtype: float64
+
+Portfolio minimal cost: COP$ 404,140
+
+Weights adjusted
+BBVACOL       0.17
+BMC           0.04
+EXITO         0.04
+GASNATURAL    0.19
+MINEROS       0.26
+POPULAR       0.10
+PROMIGAS      0.15
+TERPEL        0.05
+Name: 2019-05-16, dtype: float64
