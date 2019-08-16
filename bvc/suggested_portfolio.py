@@ -12,7 +12,7 @@ def main():
     with open('data/bvc/train_history_out.json', 'r') as train_history_file:
         optimal = json.load(train_history_file)
     opt_backward = optimal['opt_backward']
-    weights_arr = mpt.suggested_portfolio(opt_backward, prices)
+    weights_arr = mpt.suggested_portfolio(opt_backward, prices, 1)
     weights_ser = pd.Series(weights_arr, index=prices.columns)
     non_zero_weights = weights_ser[weights_ser>0]
     print('Portfolio weights:')
